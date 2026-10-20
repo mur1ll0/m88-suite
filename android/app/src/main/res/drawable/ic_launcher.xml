@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Oculos estilizado (mesmo desenho do icone "glasses" do app Windows). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#0F1220" android:pathData="M0,0h24v24h-24z" />
+    <path android:strokeColor="#4F8CFF" android:strokeWidth="1.6" android:strokeLineCap="round"
+        android:pathData="M3,14a3.5,3.5 0,1 0,7 0a3.5,3.5 0,1 0,-7 0M14,14a3.5,3.5 0,1 0,7 0a3.5,3.5 0,1 0,-7 0M10,14h4M3,14L5,6M21,14l-2,-8" />
+</vector>

@@ -1,0 +1,31 @@
+[project]
+name = "m88suite"
+version = "0.1.0"
+description = "Controle do oculos M88 (BK7258) para Windows"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+  "bleak==0.22.3",
+  "PySide6==6.8.1",
+  "av==13.1.0",
+  "Pillow==11.0.0",
+  "numpy==2.1.3",
+  "pyvirtualcam==0.12.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==8.3.4"]
+
+[project.scripts]
+m88suite = "m88suite.app:main"
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
