@@ -28,6 +28,10 @@ import java.util.UUID
  */
 @SuppressLint("MissingPermission") // permissoes pedidas pela MainActivity antes de conectar
 class GattLink(private val context: Context) {
+    companion object {
+        const val REGISTER_FAIL_MS = 500L
+    }
+
     private val _connected = MutableStateFlow(false)
     val connected: StateFlow<Boolean> = _connected
     private val _notifications = MutableSharedFlow<Pair<UUID, ByteArray>>(
@@ -37,6 +41,7 @@ class GattLink(private val context: Context) {
     private var gatt: BluetoothGatt? = null
     private val mutex = Mutex()
     private var pendingConnect: CompletableDeferred<Unit>? = null
+    private var connectStartedAt = 0L
     private var pendingOp: CompletableDeferred<Int>? = null
 
     private val callback = object : BluetoothGattCallback() {
@@ -45,7 +50,10 @@ class GattLink(private val context: Context) {
                 g.discoverServices()
             } else {
                 _connected.value = false
-                pendingConnect?.completeExceptionally(IllegalStateException("conexao recusada ($status)"))
+                // 133 imediato = o Android recusou registrar o cliente GATT (vagas esgotadas por outro app)
+                val instant = System.currentTimeMillis() - connectStartedAt < REGISTER_FAIL_MS
+                val error = if (instant && (status == 133 || status == 257)) BluetoothSlotsFull() else IllegalStateException("conexão recusada ($status)")
+                pendingConnect?.completeExceptionally(error)
                 pendingOp?.complete(-1)
                 g.close()
                 if (gatt === g) gatt = null
@@ -78,6 +86,7 @@ class GattLink(private val context: Context) {
             ?: error("Bluetooth indisponivel")
         check(adapter.isEnabled) { "Bluetooth desligado" }
         val wait = CompletableDeferred<Unit>().also { pendingConnect = it }
+        connectStartedAt = System.currentTimeMillis()
         gatt = adapter.getRemoteDevice(address).connectGatt(context, false, callback, BluetoothDevice.TRANSPORT_LE)
         try {
             withTimeout(timeoutMs) { wait.await() }
@@ -127,6 +136,11 @@ class GattLink(private val context: Context) {
             pendingOp = null
         }
     }
+
+    /** O Android nao tem vaga para mais um cliente Bluetooth LE (limite de 32 por aparelho). */
+    class BluetoothSlotsFull : IllegalStateException(
+        "o Bluetooth do celular está sem vagas para conexões (outro app está ocupando todas). " +
+            "Desligue e ligue o Bluetooth do celular.")
 
     fun close() {
         gatt?.let {

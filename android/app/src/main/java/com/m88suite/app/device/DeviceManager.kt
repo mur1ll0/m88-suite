@@ -63,6 +63,7 @@ class DeviceManager(context: Context, var address: String = StockBle.DEFAULT_ADD
     }
 
     private fun say(message: String) {
+        android.util.Log.i(TAG, message)
         _log.tryEmit(message)
         _telemetry.update { it.copy(message = message) }
     }
@@ -100,7 +101,12 @@ class DeviceManager(context: Context, var address: String = StockBle.DEFAULT_ADD
                     say("Bluetooth conectado")
                 } catch (e: Exception) {
                     val wait = backoff.nextDelay()
-                    say("Bluetooth indisponível (${e.message}); nova tentativa em ${wait.toInt()}s")
+                    if (e is GattLink.BluetoothSlotsFull) {
+                        // apps comuns nao podem listar quem ocupa as vagas; via adb: dumpsys bluetooth_manager
+                        say("Não foi possível usar o Bluetooth: ${e.message}")
+                    } else {
+                        say("Bluetooth indisponível (${e.message}); nova tentativa em ${wait.toInt()}s")
+                    }
                     delay((wait * 1000).toLong())
                     continue
                 }
@@ -264,6 +270,7 @@ class DeviceManager(context: Context, var address: String = StockBle.DEFAULT_ADD
     }
 
     companion object {
+        const val TAG = "M88Suite"
         const val KEEPALIVE_MS = 4_000L
         const val WATCHDOG_MS = 1_000L
         const val MAX_RECOVERIES = 3

@@ -41,9 +41,9 @@ vídeos, telemetria do óculos e reconexão automática — funcionando com o **
 Rodar do código‑fonte ou gerar o EXE: [desktop/README.md](desktop/README.md).
 
 ### Android (13+)
-Gere o APK com `android\gradlew.bat :app:assembleDebug` e instale
-(`adb install -r android/app/build/outputs/apk/debug/app-debug.apk`). Detalhes em
-[android/README.md](android/README.md).
+Baixe o APK na página de **Releases** (ou gere com `android\gradlew.bat :app:assembleRelease`) e
+instale. Se o app não encontrar o óculos, veja **Problemas conhecidos** em
+[android/README.md](android/README.md) — no Android alguns apps esgotam as conexões Bluetooth LE.
 
 ## Dicas de uso
 

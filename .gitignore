@@ -16,3 +16,6 @@ android/keystore/
 android/keystore.properties
 *.jks
 *.keystore
+
+# Saida de IDE (VS Code/Eclipse Kotlin)
+android/**/bin/
