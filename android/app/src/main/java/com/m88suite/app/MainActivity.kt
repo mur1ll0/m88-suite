@@ -51,6 +51,15 @@ class MainActivity : ComponentActivity() {
         Manifest.permission.NEARBY_WIFI_DEVICES,
         Manifest.permission.ACCESS_FINE_LOCATION,
     )
+    // Opcionais: so para a aba Midia listar arquivos baixados por instalacoes anteriores do app.
+    private val mediaPermissions = arrayOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO)
+    private val mediaRequest = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { }
+
+    private fun askMediaPermissions() {
+        if (mediaPermissions.any { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }) {
+            mediaRequest.launch(mediaPermissions)
+        }
+    }
     private var onPermissions: () -> Unit = {}
     private val request = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
         if (result.values.all { it }) onPermissions()
@@ -74,8 +83,7 @@ class MainActivity : ComponentActivity() {
                 val t by manager.telemetry.collectAsState()
                 val log = remember { mutableStateListOf<String>() }
                 var tab by remember { mutableStateOf(0) }
-                var mediaStatus by remember { mutableStateOf("") }
-                var syncing by remember { mutableStateOf(false) }
+                val mediaState by manager.mediaState.collectAsState()
 
                 LaunchedEffect(Unit) {
                     withPermissions { manager.connect() }
@@ -103,16 +111,9 @@ class MainActivity : ComponentActivity() {
                                 onRestart = { manager.restartDevice() })
                             1 -> CameraScreen(t, manager.video, onStart = { cfg -> withPermissions { manager.startStream(cfg) } },
                                 onStop = { manager.stopStream() })
-                            2 -> MediaScreen(t.mediaCount, mediaStatus, syncing) {
-                                syncing = true
-                                withPermissions {
-                                    manager.syncMedia { msg ->
-                                        runOnUiThread {
-                                            mediaStatus = msg
-                                            if (msg.startsWith("Sincronizado") || msg.startsWith("Falha")) syncing = false
-                                        }
-                                    }
-                                }
+                            2 -> {
+                                LaunchedEffect(Unit) { askMediaPermissions() }
+                                MediaScreen(manager, mediaState)
                             }
                             else -> MoreScreen()
                         }

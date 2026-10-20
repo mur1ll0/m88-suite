@@ -29,6 +29,15 @@ import java.net.InetSocketAddress
 /** Unidade de video entregue a UI. */
 class VideoUnit(val data: ByteArray, val codec: String)
 
+/** Estado da tela de midia. */
+data class MediaState(
+    val remote: List<RemoteMedia> = emptyList(),
+    val remoteLoaded: Boolean = false,
+    val busy: Boolean = false,
+    val status: String = "",
+    val localVersion: Int = 0, // muda quando arquivos sao baixados (a UI recarrega a galeria)
+)
+
 /**
  * Conexao, telemetria, video e midia do M88 com o firmware de fabrica.
  * Espelho de desktop/src/m88suite/core/manager.py.
@@ -37,7 +46,7 @@ class DeviceManager(context: Context, var address: String = StockBle.DEFAULT_ADD
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val gatt = GattLink(context)
     private val wifi = WifiLink(context)
-    private val media = MediaSync(context)
+    val media = MediaRepository(context)
     private val ops = Mutex() // uma operacao de alto nivel por vez (video, midia, reinicio)
 
     private val _telemetry = MutableStateFlow(Telemetry())
@@ -249,16 +258,52 @@ class DeviceManager(context: Context, var address: String = StockBle.DEFAULT_ADD
     }
 
     // ------------------------------------------------------------------ midia
-    fun syncMedia(onProgress: (String) -> Unit) = scope.launch {
+    private val _media = MutableStateFlow(MediaState())
+    val mediaState: StateFlow<MediaState> = _media
+
+    private fun mediaJob(working: String, block: suspend (android.net.Network) -> Unit) = scope.launch {
         ops.withLock {
+            _media.update { it.copy(busy = true, status = working) }
             try {
                 val net = ensureWifi()
-                val result = withContext(Dispatchers.IO) { media.sync(net, onProgress) }
-                _telemetry.update { it.copy(mediaCount = result.total) }
+                withContext(Dispatchers.IO) { block(net) }
             } catch (e: Exception) {
-                onProgress("Falha na sincronização: ${e.message}")
+                _media.update { it.copy(status = "Falha: ${e.message}") }
+            } finally {
+                _media.update { it.copy(busy = false) }
             }
         }
+    }
+
+    private fun reloadRemote(net: android.net.Network) {
+        val files = media.listRemote(net)
+        _media.update { it.copy(remote = files, remoteLoaded = true) }
+        _telemetry.update { it.copy(mediaCount = files.size) }
+    }
+
+    fun refreshRemote() = mediaJob("Lendo o cartão do óculos…") { net ->
+        reloadRemote(net)
+        _media.update { it.copy(status = "${it.remote.size} arquivo(s) no óculos") }
+    }
+
+    fun download(items: List<RemoteMedia>, deleteAfter: Boolean) = mediaJob("Preparando download…") { net ->
+        val r = media.download(net, items, deleteAfter) { msg -> _media.update { it.copy(status = msg) } }
+        reloadRemote(net)
+        val removed = if (deleteAfter) ", ${r.deleted} apagado(s) do óculos" else ""
+        val failed = if (r.failed > 0) ", ${r.failed} falha(s)" else ""
+        _media.update { it.copy(status = "Baixado(s): ${r.downloaded}$removed$failed", localVersion = it.localVersion + 1) }
+    }
+
+    fun deleteRemote(items: List<RemoteMedia>) = mediaJob("Apagando do óculos…") { net ->
+        val n = media.deleteRemote(net, items.map { it.name })
+        reloadRemote(net)
+        _media.update { it.copy(status = "$n arquivo(s) apagado(s) do óculos") }
+    }
+
+    fun preview(item: RemoteMedia, onReady: (java.io.File) -> Unit) = mediaJob("Abrindo ${item.name}…") { net ->
+        val file = media.preview(net, item)
+        _media.update { it.copy(status = "") }
+        onReady(file)
     }
 
     fun close() {

@@ -11,8 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bluetooth
-import androidx.compose.material.icons.rounded.Sync
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -21,20 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-
-@Composable
-fun MediaScreen(mediaCount: Int?, status: String, syncing: Boolean, onSync: () -> Unit) {
-    Column(Modifier.verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        ScreenTitle("Fotos e vídeos", "Copia os arquivos novos do óculos para a galeria (Imagens/M88 e Filmes/M88)")
-        Button(onClick = onSync, enabled = !syncing) {
-            Icon(Icons.Rounded.Sync, null)
-            Text(if (syncing) "  Sincronizando…" else "  Sincronizar agora")
-        }
-        Text("Arquivos no óculos: ${mediaCount ?: "—"}", style = MaterialTheme.typography.bodyLarge)
-        if (status.isNotEmpty()) Text(status, color = Palette.Muted)
-        Notice("A sincronização liga o Wi‑Fi do óculos; o Android pode pedir para confirmar a rede M88-522B na primeira vez.")
-    }
-}
 
 private val STOCK_EVENTS = listOf(
     "BTN0 BSP_LONG_PRESS" to "toque longo no botão 0",
