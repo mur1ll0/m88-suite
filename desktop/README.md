@@ -17,7 +17,7 @@ celular conectado nele. Webcam virtual: [OBS Studio](https://obsproject.com/) in
 |---|---|
 | Painel | Bluetooth, bateria, Wi‑Fi, câmera, nº de arquivos, estado do óculos; conectar/desconectar; reiniciar o óculos |
 | Câmera | Vídeo ao vivo (H.264/UDP recomendado), fps/banda/descartes, webcam virtual (OBS Virtual Camera) |
-| Fotos e vídeos | Copia os arquivos novos do cartão para `Imagens\M88` (opcional: automático ao conectar) |
+| Fotos e vídeos | Lista o que está no óculos (data, tipo, tamanho, já baixado); baixar novos ou selecionados para a pasta escolhida; pré-visualizar foto; apagar do óculos (manual ou depois de baixar, só após conferir o tamanho); galeria do que já foi baixado |
 | Áudio | Atalhos para usar o óculos como fone/microfone Bluetooth do Windows |
 | Botões / Firmware | Informações; remapeamento e atualização chegam com o firmware M88 Suite |
 | Configurações | Endereço Bluetooth do óculos, conectar ao abrir |

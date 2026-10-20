@@ -19,7 +19,8 @@ vídeos, telemetria do óculos e reconexão automática — funcionando com o **
 | Vídeo ao vivo (H.264/UDP, H.264/TCP ou JPEG) com fps e banda | ✅ | ✅ |
 | Recuperação do vídeo congelado (reinicia o óculos e retoma) | ✅ | ✅ |
 | Webcam virtual para Meet/Zoom/Teams/OBS | ✅ | — ¹ |
-| Copiar fotos e vídeos novos do óculos (galeria/pasta) | ✅ | ✅ |
+| Ver o que está no óculos, baixar para a pasta/álbum escolhido e apagar do óculos | ✅ | ✅ |
+| Galeria das mídias baixadas | ✅ | ✅ |
 | Reiniciar o óculos remotamente | ✅ | ✅ |
 | Fone de ouvido e microfone | ✅ ² | ✅ ² |
 
@@ -27,6 +28,8 @@ vídeos, telemetria do óculos e reconexão automática — funcionando com o **
 ² Pelo Bluetooth do sistema (o óculos é um headset A2DP/HFP); o app mostra os atalhos.
 
 ![Câmera](docs/img/screenshot_camera.png)
+
+![Fotos e vídeos](docs/img/screenshot_midia.png)
 
 ## Instalação
 

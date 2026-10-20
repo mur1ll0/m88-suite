@@ -35,9 +35,21 @@ QPushButton#primary:hover {{ background: #6A9EFF; }}
 QPushButton#danger {{ background: transparent; border: 1px solid {BAD}; color: {BAD}; }}
 QComboBox, QLineEdit, QSpinBox {{ background: {SURFACE_2}; border: 1px solid #2A3157; border-radius: 8px; padding: 8px 10px; }}
 QComboBox QAbstractItemView {{ background: {SURFACE_2}; selection-background-color: {ACCENT}; }}
-QCheckBox::indicator {{ width: 20px; height: 20px; }}
+QCheckBox::indicator, QTreeView::indicator {{ width: 18px; height: 18px; border: 2px solid {MUTED}; border-radius: 5px; margin-right: 6px;
+                                           background: {SURFACE}; }}
+QCheckBox::indicator:checked, QTreeView::indicator:checked {{ background: {ACCENT}; border-color: {ACCENT}; }}
 QListWidget#files, QPlainTextEdit {{ background: {SURFACE}; border: 1px solid {SURFACE_2}; border-radius: 12px; padding: 6px; }}
 QLabel#video {{ background: #05060C; border-radius: 16px; color: {MUTED}; }}
+QTabWidget::pane {{ border: 1px solid {SURFACE_2}; border-radius: 12px; background: {SURFACE}; top: -1px; }}
+QTabBar::tab {{ background: transparent; color: {MUTED}; padding: 10px 18px; margin-right: 4px;
+               border-bottom: 2px solid transparent; }}
+QTabBar::tab:selected {{ color: {TEXT}; border-bottom: 2px solid {ACCENT}; }}
+QTabBar::tab:hover {{ color: {TEXT}; }}
+QTreeWidget {{ background: {SURFACE}; alternate-background-color: {SURFACE_2}; border: none; border-radius: 10px; }}
+QTreeWidget::item {{ padding: 8px 4px; }}
+QHeaderView::section {{ background: {SURFACE}; color: {MUTED}; border: none; border-bottom: 1px solid {SURFACE_2};
+                       padding: 8px 6px; }}
+QDialog, QMessageBox {{ background: {BG}; }}
 QProgressBar {{ background: {SURFACE_2}; border: none; border-radius: 6px; height: 12px; text-align: center; }}
 QProgressBar::chunk {{ background: {OK}; border-radius: 6px; }}
 """

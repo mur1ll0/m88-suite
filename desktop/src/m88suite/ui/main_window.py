@@ -96,8 +96,8 @@ class MainWindow(QMainWindow):
         self.battery_label.setText(f"Bateria {t.battery}%   " if t.battery is not None else "")
         became_connected = t.link == LinkState.CONNECTED and self._last_link != LinkState.CONNECTED
         self._last_link = t.link
-        if became_connected and self.media.auto.isChecked() and t.stream == StreamState.OFF:
-            self.media.sync()
+        if became_connected and t.stream == StreamState.OFF:
+            self.media.auto_sync()
 
     def closeEvent(self, event):
         self.camera._toggle_webcam(False)

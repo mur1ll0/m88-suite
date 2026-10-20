@@ -32,7 +32,7 @@ sincronizar, o Android pergunta se pode conectar na rede **M88-522B** — confir
 |---|---|
 | Painel | Bluetooth, bateria, Wi‑Fi, câmera, nº de arquivos, estado; conectar e reiniciar o óculos |
 | Câmera | Vídeo ao vivo (H.264/UDP decodificado por hardware, ou JPEG) com fps e banda |
-| Mídia | Copia fotos/vídeos novos para a galeria (Imagens/M88, Filmes/M88) |
+| Mídia | Aba **No óculos**: lista do cartão, baixar novos/selecionados, pré-visualizar foto, apagar (com confirmação). Destino: álbum da galeria (Imagens/<nome>, Filmes/<nome>) ou pasta escolhida. Opção de apagar do óculos depois de baixar (só após conferir o tamanho). Aba **Baixadas**: miniaturas e abrir na galeria |
 | Mais | Áudio (headset Bluetooth do sistema), eventos de botões, informações de firmware |
 
 Mesma lógica de reconexão do app Windows: BLE com backoff; vídeo congelado → reinicia o óculos e

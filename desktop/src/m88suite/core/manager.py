@@ -17,6 +17,7 @@ from . import wifi
 from .backoff import Backoff
 from .ble_client import M88Ble
 from .device import LinkState, StreamState, Telemetry, apply_notification
+from .media import MediaClient, RemoteMedia
 from .stock import ble_proto, ftp_media
 from .stock.doorbell import CMD_PORT
 from .stock.video import StreamConfig, VideoSession
@@ -51,6 +52,8 @@ class DeviceManager:
         self._stream_cfg: StreamConfig | None = None
         self._watchdog: asyncio.Task | None = None
         self._video_used_this_boot = False
+        self.media = MediaClient()
+        self._media_lock = asyncio.Lock()
 
     # ------------------------------------------------------------------ API publica
     def connect(self) -> Future:
@@ -68,8 +71,20 @@ class DeviceManager:
     def restart_device(self) -> Future:
         return self._submit(self._restart_device())
 
-    def sync_media(self, dest: Path, on_progress: Callable[[str], None] = lambda s: None) -> Future:
-        return self._submit(self._sync_media(dest, on_progress))
+    def list_remote(self) -> Future:
+        """Future -> list[RemoteMedia] do cartao do oculos."""
+        return self._submit(self._media(lambda: self.media.list_remote()))
+
+    def download(self, items: list[RemoteMedia], dest: Path, delete_after: bool,
+                 on_progress: Callable[[str], None] = lambda s: None) -> Future:
+        return self._submit(self._media(lambda: self.media.download(items, dest, delete_after, on_progress)))
+
+    def delete_remote(self, items: list[RemoteMedia]) -> Future:
+        return self._submit(self._media(lambda: self.media.delete_remote([i.name for i in items])))
+
+    def preview(self, item: RemoteMedia) -> Future:
+        """Future -> bytes da foto (nao salva em disco)."""
+        return self._submit(self._media(lambda: self.media.preview(item)))
 
     def shutdown(self, timeout: float = 5.0):
         try:
@@ -255,15 +270,10 @@ class DeviceManager:
             self._say(f"Recuperacao falhou: {e}")
 
     # ---- midia
-    async def _sync_media(self, dest: Path, on_progress: Callable[[str], None]) -> int:
-        await self._ensure_wifi()
-        dest.mkdir(parents=True, exist_ok=True)
-        files = await asyncio.to_thread(ftp_media.ftp_list)
-        media = [(p, size) for p, size in files if Path(p).suffix.lower() in ftp_media.MEDIA_EXT]
-        new = [(p, size) for p, size in media if not (dest / Path(p).name).exists()]
-        self._update(media_count=len(media))
-        for i, (remote, _size) in enumerate(new, 1):
-            on_progress(f"Baixando {i}/{len(new)}: {Path(remote).name}")
-            await asyncio.to_thread(ftp_media.ftp_get, remote, dest)
-        on_progress(f"Sincronizado: {len(new)} novo(s), {len(media)} no oculos")
-        return len(new)
+    async def _media(self, op):
+        async with self._media_lock:  # o servidor FTP do oculos atende um cliente por vez
+            await self._ensure_wifi()
+            result = await asyncio.to_thread(op)
+            if isinstance(result, list):
+                self._update(media_count=len(result))
+            return result
