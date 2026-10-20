@@ -10,3 +10,9 @@ local.properties
 .idea/
 android/**/build/
 firmware/build/
+
+# Assinatura de release (nunca versionar)
+android/keystore/
+android/keystore.properties
+*.jks
+*.keystore
